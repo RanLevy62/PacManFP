@@ -10,5 +10,5 @@ include_directories(${SDL2_INCLUDE_DIRS})
 # Find all executables
 file(GLOB project_SRCS src/*.cpp)
 
-add_executable(PacManFP ${project_SRCS} )
+add_executable(PacManFP ${project_SRCS} src/Machine.cpp src/Machine.h src/Game.cpp src/Game.h)
 target_link_libraries(PacManFP ${SDL2_LIBRARIES} )
