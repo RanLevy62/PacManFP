@@ -6,19 +6,31 @@
 
 #include <memory>
 #include <SDL.h>
-#include "Game.h"
 
 class Machine {
 
 public:
+    enum UserCommand {
+        NoCommand,
+        Quit,
+        Pause,
+        Resume,
+        MoveUp,
+        MoveDown,
+        MoveLeft,
+        MoveRight
+    };
+
     Machine();
     ~Machine();
     bool Init(int screenHeight, int screenWidth);
-    Game::UserCommand poll();
+    UserCommand poll();
+
+    void drawLine(int x1, int y1, int x2, int y2);
 
 private:
     std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> _window;
-    SDL_Surface* _screenSurface;
+    std::unique_ptr<SDL_Renderer , decltype(&SDL_DestroyRenderer)> _renderer;
     int _screenHeight, _screenWidth;
 
 };

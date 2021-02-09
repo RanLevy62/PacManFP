@@ -1,31 +1,46 @@
 #include <iostream>
-#include "Machine.h"
+#include "Game.h"
+#include <thread>
+
+void printMainMenu() {
+    std::cout << "Main Menu\n";
+    std::cout << "0 - quit\n";
+    std::cout << "1 - play easy\n";
+    std::cout << "2 - play hard\n";
+}
 
 int main() {
-    const int SCREEN_WIDTH = 640;
-    const int SCREEN_HEIGHT = 480;
-
-    Machine machine;
-    machine.Init(SCREEN_HEIGHT, SCREEN_WIDTH);
+    Game game;
 
     bool quit = false;
-    bool paused = false;
-    while (!quit) {
-        Game::UserCommand command = machine.poll();
+    int command;
+    int gameResult;
 
+    while (!quit) {
+        printMainMenu();
+        gameResult = 0;
+        std::cin  >> command;
         switch (command) {
-            case Game::Quit :
+            case 0:
                 quit = true;
                 break;
-            case Game::Pause:
-                paused = true;
+            case 1:
+                gameResult = game.play("../data/game1");
                 break;
-            case Game::Resume:
-                paused = false;
+            case 2:
+                gameResult = game.play("../data/game2");
                 break;
             default:
                 break;
         }
+        if (gameResult < 0) {
+            std::cout << "Game error. Aborting...\n";
+            exit(-1);
+        } else {
+            std::cout  << "Your score is " << gameResult << " points." << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+
     return 0;
 }

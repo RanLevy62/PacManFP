@@ -7,13 +7,14 @@
 
 Machine::Machine():
         _window(nullptr, SDL_DestroyWindow),
-        _screenSurface(nullptr),
+        _renderer(nullptr, SDL_DestroyRenderer),
         _screenHeight(0),
         _screenWidth(0)
 {
 }
 
 Machine::~Machine() {
+    std::cout << "machine destructor\n";
     SDL_Quit();
 }
 
@@ -39,35 +40,37 @@ bool Machine::Init(int screenHeight, int screenWidth) {
         return false;
     }
 
+    _renderer.reset(SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_SOFTWARE));
+    if (_renderer == nullptr) {
+        std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
 
-//    int imgFlags = IMG_INIT_JPG;
-//    if ( !IMG_Init(imgFlags)) {
-//        std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
-//        return false;
-//    }
-
-    _screenSurface = SDL_GetWindowSurface(_window.get());
-    SDL_FillRect( _screenSurface, nullptr, SDL_MapRGB( _screenSurface->format, 0x0, 0x0, 0xFF ) );
-
-    //Update the surface
-    SDL_UpdateWindowSurface( _window.get() );
+    SDL_SetRenderDrawColor(_renderer.get(), 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(_renderer.get());
 
     return true;
 }
 
-Game::UserCommand Machine::poll() {
+Machine::UserCommand Machine::poll() {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
                 case SDLK_q:
-                    return Game::Quit;
+                    return Quit;
                 case SDLK_p:
-                    return Game::Pause;
+                    return Pause;
                 case SDLK_r:
-                    return Game::Resume;
+                    return Resume;
             }
         }
     }
-    return Game::NoCommand;
+    return NoCommand;
+}
+
+void Machine::drawLine(int x1, int y1, int x2, int y2) {
+    SDL_SetRenderDrawColor(_renderer.get(), 255, 255, 255, SDL_ALPHA_OPAQUE);
+    SDL_RenderDrawLine(_renderer.get(), x1, y1, x2, y2);
+    SDL_RenderPresent(_renderer.get());
 }
