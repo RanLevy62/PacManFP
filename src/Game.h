@@ -10,14 +10,13 @@
 #include <iostream>
 #include "Machine.h"
 
-const int CELL_SIZE = 50;
+const int CELL_SIZE = 40;
 
 class Cell {
 
 public:
     explicit Cell(int cellData);
     void draw(Machine &machine, int x0, int y0);
-    std::string getUp() { return _upWall ? "up" : "";}
 private:
     bool _upWall, _downWall, _rightWall, _leftWall;
 };
