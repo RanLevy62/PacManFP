@@ -74,3 +74,12 @@ void Machine::drawLine(int x1, int y1, int x2, int y2) {
     SDL_RenderDrawLine(_renderer.get(), x1, y1, x2, y2);
     SDL_RenderPresent(_renderer.get());
 }
+
+void Machine::drawImage(SDL_Surface *image, int x, int y){
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer.get(), image);
+    SDL_Rect rect {
+        x, y, image->w, image->h
+    };
+    SDL_RenderCopy(_renderer.get(), texture, nullptr, &rect);
+    SDL_RenderPresent(_renderer.get());
+}

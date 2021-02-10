@@ -4,13 +4,17 @@
 
 #pragma once
 
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include "Machine.h"
+#include "PacMan.h"
+#include "Ghost.h"
 
-const int CELL_SIZE = 40;
+// ToDo - Make machine a member of Game
+// Todo - Check memory leaks when quiting game
+
+
 
 class Cell {
 
@@ -34,5 +38,7 @@ private:
     int _numCols;
     std::vector<std::vector<std::unique_ptr<Cell>>> _board;
     int _score;
+    PacMan _pacman;
+    Ghost _ghosts[4];
 };
 

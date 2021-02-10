@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Machine.h"
+#include "graphic_constants.h"
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -38,6 +39,7 @@ void Game::initGameData(const std::string& gameFileName) {
     _board.clear();
     std::ifstream gameFile(gameFileName);
 
+    // Init game board
     gameFile >> _numRows >> _numCols;
     std::cout << "cols " << _numCols << "  rows " << _numRows << std::endl;
 
@@ -51,13 +53,31 @@ void Game::initGameData(const std::string& gameFileName) {
             _board[row].emplace_back(std::move(c));
         }
     }
+
+    // Init Pacman and ghosts
+    int pacmanRow, pacmanCol;
+    std::string pacmanImageFileName;
+    gameFile >> pacmanRow >> pacmanCol >> pacmanImageFileName;
+    _pacman = PacMan(pacmanRow, pacmanCol, pacmanImageFileName);
+
+    SDL_Surface *t = SDL_LoadBMP(pacmanImageFileName.c_str());
+    std::cout  << SDL_GetError() << std::endl;
+
+    int ghostRow, ghostCol;
+    std::string ghostImageFileName;
+    for (auto & _ghost : _ghosts) {
+        gameFile >> ghostRow >> ghostCol >> ghostImageFileName;
+        _ghost = Ghost(ghostRow, ghostCol, ghostImageFileName);
+    }
+
+
 }
 
 int Game::play(const std::string &gameFileName) {
     initGameData(gameFileName);
 
-    const int SCREEN_WIDTH = 640;
-    const int SCREEN_HEIGHT = 480;
+    const int SCREEN_WIDTH = 1100;
+    const int SCREEN_HEIGHT = 1100;
 
     Machine machine;
     if (!machine.Init(SCREEN_HEIGHT, SCREEN_WIDTH)) {
@@ -97,6 +117,10 @@ void Game::drawGameBoard(Machine &machine) const {
         }
     }
 
+    _pacman.Creature::draw(machine);
+    for (int i = 0 ; i < 4 ; i++) {
+        _ghosts[i].draw(machine);
+    }
 }
 
 
