@@ -6,11 +6,17 @@
 
 #include "Creature.h"
 
+class Game;
+
 class Ghost: public Creature {
 public:
     Ghost();
-    Ghost(int currentRow, int currentCol, const std::string &imageFileName);
+    Ghost(Game *game, int currentRow, int currentCol, const std::string &imageFileName);
+    Direction requestedDirection();
+    void move();
 
+private:
+    void selectDirection();
 };
 
 

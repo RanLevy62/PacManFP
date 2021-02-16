@@ -15,14 +15,19 @@
 // Todo - Check memory leaks when quiting game
 
 
-
 class Cell {
 
 public:
     explicit Cell(int cellData);
-    void draw(Machine &machine, int x0, int y0);
+    void draw(Machine &machine, int row, int col) const;
+    bool hasDownWall() const;
+    bool hasRightWall() const;
+    bool hasLeftWall() const;
+    bool hasUpWall() const;
 private:
     bool _upWall, _downWall, _rightWall, _leftWall;
+public:
+
 };
 
 class Game {
@@ -30,6 +35,8 @@ public:
 
     Game();
     int play(const std::string& gameFileName);
+    bool directionValid(int row, int col, Direction dir);
+
 private:
     void initGameData(const std::string& gameFileName);
     void drawGameBoard(Machine &machine) const;

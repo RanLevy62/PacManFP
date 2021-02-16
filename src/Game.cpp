@@ -4,7 +4,6 @@
 
 #include "Game.h"
 #include "Machine.h"
-#include "graphic_constants.h"
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -58,16 +57,13 @@ void Game::initGameData(const std::string& gameFileName) {
     int pacmanRow, pacmanCol;
     std::string pacmanImageFileName;
     gameFile >> pacmanRow >> pacmanCol >> pacmanImageFileName;
-    _pacman = PacMan(pacmanRow, pacmanCol, pacmanImageFileName);
-
-    SDL_Surface *t = SDL_LoadBMP(pacmanImageFileName.c_str());
-    std::cout  << SDL_GetError() << std::endl;
+    _pacman = PacMan(this, pacmanRow, pacmanCol, pacmanImageFileName);
 
     int ghostRow, ghostCol;
     std::string ghostImageFileName;
     for (auto & _ghost : _ghosts) {
         gameFile >> ghostRow >> ghostCol >> ghostImageFileName;
-        _ghost = Ghost(ghostRow, ghostCol, ghostImageFileName);
+        _ghost = Ghost(this, ghostRow, ghostCol, ghostImageFileName);
     }
 
 
@@ -87,10 +83,15 @@ int Game::play(const std::string &gameFileName) {
 
     drawGameBoard(machine);
 
+
+    // Game Loop
     bool quit = false;
     bool paused = false;
-    int i = 0;
     while (!quit) {
+
+        auto gameLoopStopTime = std::chrono::system_clock::now() + std::chrono::milliseconds(GAME_LOOP_INTERVAL_MS);
+
+        // handle input
         Machine::UserCommand command = machine.poll();
 
         switch (command) {
@@ -106,21 +107,64 @@ int Game::play(const std::string &gameFileName) {
             default:
                 break;
         }
+
+        // before move - delete creatures
+        if (!paused) {
+            for (auto & _ghost : _ghosts) {
+                int row1 = _ghost.getCurrentRow();
+                int col1 = _ghost.getCurrentCol();
+                _board[row1][col1].get()->draw(machine, row1, col1);
+//                int row2 = _ghost.getNextRow();
+//                int col2 = _ghost.getNextCol();
+//                _board[row2][col2].get()->draw(machine, row2, col2);
+
+            }
+        }
+
+
+        // update game state
+        if (!paused) {
+            for (auto & _ghost : _ghosts) {
+                _ghost.move();
+            }
+        }
+
+        // render
+        if (!paused) {
+            for (auto & _ghost : _ghosts) {
+                _ghost.draw(machine);
+            }
+        }
+
+        machine.render();
+        // sync game loop time
+
+        std::this_thread::sleep_until(gameLoopStopTime);
     }
+
     return _score;
 }
 
 void Game::drawGameBoard(Machine &machine) const {
     for (int row = 0 ; row < _numRows ; row++) {
         for (int col = 0 ; col < _numCols ; col++) {
-            _board[row][col].get()->draw(machine, col * CELL_SIZE + 5, row * CELL_SIZE + 5);
+            _board[row][col].get()->draw(machine, row, col);
         }
     }
 
     _pacman.Creature::draw(machine);
-    for (int i = 0 ; i < 4 ; i++) {
-        _ghosts[i].draw(machine);
+    for (const auto & _ghost : _ghosts) {
+        _ghost.draw(machine);
     }
+
+    machine.render();
+}
+
+bool Game::directionValid(int row, int col, Direction dir) {
+    return (dir == Up  &&  !_board[row][col].get()->hasUpWall()) ||
+           (dir == Down  &&  !_board[row][col].get()->hasDownWall()) ||
+           (dir == Right  &&  !_board[row][col].get()->hasRightWall()) ||
+           (dir == Left  &&  !_board[row][col].get()->hasLeftWall()) ;
 }
 
 
@@ -132,10 +176,29 @@ Cell::Cell(int cellData):
 {
 }
 
-void Cell::draw(Machine &machine, int x0, int y0) {
-    if (_upWall) machine.drawLine(x0, y0, x0 + CELL_SIZE, y0);
-    if (_downWall) machine.drawLine(x0, y0 + CELL_SIZE, x0 + CELL_SIZE, y0 + CELL_SIZE);
-    if (_rightWall) machine.drawLine(x0 + CELL_SIZE, y0, x0 + CELL_SIZE, y0 + CELL_SIZE);
-    if (_leftWall) machine.drawLine(x0, y0, x0 , y0 + CELL_SIZE);
+void Cell::draw(Machine &machine, int row, int col) const {
+    int x0 = col * CELL_SIZE + BOARD_MARGIN;
+    int y0 = row * CELL_SIZE + BOARD_MARGIN;
+    machine.drawRect(x0, y0, CELL_SIZE, CELL_SIZE);
+    if (_upWall) machine.drawLine(x0, y0, x0 + CELL_SIZE - 1, y0);
+    if (_downWall) machine.drawLine(x0, y0 + CELL_SIZE - 1, x0 + CELL_SIZE - 1, y0 + CELL_SIZE - 1);
+    if (_rightWall) machine.drawLine(x0 + CELL_SIZE - 1, y0, x0 + CELL_SIZE - 1, y0 + CELL_SIZE - 1);
+    if (_leftWall) machine.drawLine(x0, y0, x0 , y0 + CELL_SIZE - 1);
 
+}
+
+bool Cell::hasUpWall() const {
+    return _upWall;
+}
+
+bool Cell::hasDownWall() const {
+    return _downWall;
+}
+
+bool Cell::hasRightWall() const {
+    return _rightWall;
+}
+
+bool Cell::hasLeftWall() const {
+    return _leftWall;
 }
