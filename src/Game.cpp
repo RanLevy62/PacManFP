@@ -73,8 +73,8 @@ void Game::initGameData(const std::string& gameFileName) {
 int Game::play(const std::string &gameFileName) {
     initGameData(gameFileName);
 
-    const int SCREEN_WIDTH = 1100;
-    const int SCREEN_HEIGHT = 1100;
+    const int SCREEN_WIDTH = (_numCols + 1) * CELL_SIZE ;
+    const int SCREEN_HEIGHT = (_numRows + 1) * CELL_SIZE;
 
     Machine machine;
     if (!machine.Init(SCREEN_HEIGHT, SCREEN_WIDTH)) {
