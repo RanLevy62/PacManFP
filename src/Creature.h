@@ -17,14 +17,12 @@ public:
     Creature();
     Creature(Game *game, int currentRow, int currentCol, const std::string& imageFileName);
     void draw(Machine &machine) const;
-    virtual Direction requestedDirection() = 0;
     void move();
     bool atCellCenter() const;
     void setNextCell();
     int getCurrentRow() const;
     int getCurrentCol() const;
-    int getNextRow() const;
-    int getNextCol() const;
+
 
 protected:
     int _currentRow;

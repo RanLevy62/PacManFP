@@ -14,7 +14,6 @@ Machine::Machine():
 }
 
 Machine::~Machine() {
-    std::cout << "machine destructor\n";
     SDL_Quit();
 }
 
@@ -63,6 +62,14 @@ Machine::UserCommand Machine::poll() {
                     return Pause;
                 case SDLK_r:
                     return Resume;
+                case SDLK_UP:
+                    return MoveUp;
+                case SDLK_DOWN:
+                    return MoveDown;
+                case SDLK_RIGHT:
+                    return MoveRight;
+                case SDLK_LEFT:
+                    return MoveLeft;
             }
         }
     }

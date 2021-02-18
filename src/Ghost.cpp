@@ -11,10 +11,6 @@ Ghost::Ghost(Game *game, int currentRow, int currentCol, const std::string &imag
     selectDirection();
 }
 
-Direction Ghost::requestedDirection() {
-    return Left;
-}
-
 // Ghosts select direction randomly. They just have to make sure this is a valid direction
 void Ghost::selectDirection() {
     bool selected = false;

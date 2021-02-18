@@ -11,9 +11,6 @@
 #include "PacMan.h"
 #include "Ghost.h"
 
-// ToDo - Make machine a member of Game
-// Todo - Check memory leaks when quiting game
-
 
 class Cell {
 

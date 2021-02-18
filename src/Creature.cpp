@@ -75,7 +75,8 @@ bool eq(float x, int y) {
 
 bool Creature::atCellCenter() const {
 
-    return ((_direction == Up && eq(_yOffset, -1)) ||
+    return ((eq(_xOffset, 0) && eq(_yOffset, 0)) ||
+            (_direction == Up && eq(_yOffset, -1)) ||
             (_direction == Down && eq(_yOffset, 1)) ||
             (_direction == Right && eq(_xOffset, 1)) ||
             (_direction == Left && eq(_xOffset, -1)));
@@ -87,14 +88,6 @@ int Creature::getCurrentRow() const {
 
 int Creature::getCurrentCol() const {
     return _currentCol;
-}
-
-int Creature::getNextRow() const {
-    return _nextRow;
-}
-
-int Creature::getNextCol() const {
-    return _nextCol;
 }
 
 

@@ -33,6 +33,8 @@ Game::Game():
     bit 1 - right wall
     bit 2 - bottom wall
     bit 3 - left wall
+ 4. PacMan initial data - row number, column number and image file name
+ 5. four lines, containing Ghosts initial data (same format as PacMan)
  */
 void Game::initGameData(const std::string& gameFileName) {
     _board.clear();
@@ -40,7 +42,6 @@ void Game::initGameData(const std::string& gameFileName) {
 
     // Init game board
     gameFile >> _numRows >> _numCols;
-    std::cout << "cols " << _numCols << "  rows " << _numRows << std::endl;
 
     for (int row = 0 ; row < _numRows ; row++) {
         std::vector<std::unique_ptr<Cell>> newRow;
@@ -87,7 +88,9 @@ int Game::play(const std::string &gameFileName) {
     // Game Loop
     bool quit = false;
     bool paused = false;
-    while (!quit) {
+    bool gameOver = false;
+    auto gameStartTime = std::chrono::system_clock::now();
+    while (!quit && !gameOver) {
 
         auto gameLoopStopTime = std::chrono::system_clock::now() + std::chrono::milliseconds(GAME_LOOP_INTERVAL_MS);
 
@@ -104,6 +107,18 @@ int Game::play(const std::string &gameFileName) {
             case Machine::Resume:
                 paused = false;
                 break;
+            case Machine::MoveUp:
+                _pacman.setRequestedDir(Up);
+                break;
+            case Machine::MoveDown:
+                _pacman.setRequestedDir(Down);
+                break;
+            case Machine::MoveRight:
+                _pacman.setRequestedDir(Right);
+                break;
+            case Machine::MoveLeft:
+                _pacman.setRequestedDir(Left);
+                break;
             default:
                 break;
         }
@@ -114,18 +129,28 @@ int Game::play(const std::string &gameFileName) {
                 int row1 = _ghost.getCurrentRow();
                 int col1 = _ghost.getCurrentCol();
                 _board[row1][col1].get()->draw(machine, row1, col1);
-//                int row2 = _ghost.getNextRow();
-//                int col2 = _ghost.getNextCol();
-//                _board[row2][col2].get()->draw(machine, row2, col2);
 
             }
+            int row = _pacman.getCurrentRow();
+            int col = _pacman.getCurrentCol();
+            _board[row][col].get()->draw(machine, row, col);
         }
 
 
         // update game state
         if (!paused) {
-            for (auto & _ghost : _ghosts) {
-                _ghost.move();
+            for (auto & ghost : _ghosts) {
+                ghost.move();
+            }
+            _pacman.move();
+
+            // test if PacMan was caught
+            for (auto & ghost : _ghosts) {
+                if ((ghost.getCurrentCol() == _pacman.getCurrentCol()) && (ghost.getCurrentRow() == _pacman.getCurrentRow())) {
+                    gameOver = true;
+                    _score = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - gameStartTime).count();
+                    std::cout << "***** Game Over *******\n";
+                }
             }
         }
 
@@ -134,6 +159,7 @@ int Game::play(const std::string &gameFileName) {
             for (auto & _ghost : _ghosts) {
                 _ghost.draw(machine);
             }
+            _pacman.draw(machine);
         }
 
         machine.render();

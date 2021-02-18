@@ -11,7 +11,15 @@ class PacMan: public Creature {
 public:
     PacMan();
     PacMan(Game *game, int currentRow, int currentCol, const std::string &imageFileName);
-    Direction requestedDirection();
+    void move();
+
+private:
+    Direction  _requestedDir;
+public:
+    void setRequestedDir(Direction requestedDir);
+
+private:
+    bool _blocked;
 };
 
 
